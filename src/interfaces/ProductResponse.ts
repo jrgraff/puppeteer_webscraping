@@ -1,3 +1,7 @@
 export default interface ProductResponse {
-  message: string;
+  name: string;
+  price: number;
+  reviews: number;
+  rating: number;
+  tags: string[];
 }

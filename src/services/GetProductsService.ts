@@ -1,7 +1,8 @@
 import puppeteer from 'puppeteer';
+import ProductResponse from '../interfaces/ProductResponse';
 
 class GetProductsService {
-  async execute(searchParam: string, sortType: string): Promise<any> {
+  async execute(searchParam: string, sortType: string): Promise<ProductResponse[]> {
     const url =
       'https://webscraper.io/test-sites/e-commerce/allinone/computers/laptops';
 
@@ -14,7 +15,7 @@ class GetProductsService {
 
       const products = await page.evaluate(() =>
         Array.from(document.querySelectorAll('.thumbnail'), (e) => ({
-          name: e.querySelector<HTMLAnchorElement>('.caption a')?.title,
+          name: e.querySelector<HTMLAnchorElement>('.caption a')!.title,
           price: Number(
             e.querySelector('.caption > h4')?.innerHTML.replace('$', ''),
           ),
@@ -23,8 +24,8 @@ class GetProductsService {
           ),
           rating: e.querySelectorAll('.ratings span').length,
           tags: e
-            .querySelector('.description')
-            ?.innerHTML.split(',')
+            .querySelector('.description')!
+            .innerHTML.split(',')
             .map((tag) => tag.trim()),
         })),
       );
