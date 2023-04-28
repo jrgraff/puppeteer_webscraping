@@ -3,5 +3,5 @@ export default interface ProductResponse {
   price: number;
   reviews: number;
   rating: number;
-  tags: string[];
+  description: string;
 }

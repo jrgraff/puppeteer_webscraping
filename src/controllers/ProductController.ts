@@ -4,11 +4,11 @@ import GetProductsService from '../services/GetProductsService';
 
 class ProductController {
   async handle(req: Request, res: Response): Promise<Response> {
-    const { search = 'Lenovo', sort = 'ASC' } = req.query;
+    const { search = 'Lenovo' } = req.query;
 
     const getProductsService = new GetProductsService();
 
-    const json = await getProductsService.execute(String(search), String(sort));
+    const json = await getProductsService.execute(String(search));
 
     return res.status(200).json(json);
   }

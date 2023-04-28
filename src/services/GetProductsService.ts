@@ -1,51 +1,47 @@
 import puppeteer from 'puppeteer';
 import ProductResponse from '../interfaces/ProductResponse';
 
+
 class GetProductsService {
-  async execute(searchParam: string, sortType: string): Promise<ProductResponse[]> {
-    const url =
-      'https://webscraper.io/test-sites/e-commerce/allinone/computers/laptops';
+  async execute(searchParam: string): Promise<ProductResponse[]> {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
 
-    const getProducts = async () => {
-      const browser = await puppeteer.launch();
-      const page = await browser.newPage();
+    await page.goto('https://webscraper.io/test-sites/e-commerce/allinone/computers/laptops');
 
-      await page.goto(url);
-      await page.waitForSelector('.wrapper');
-
-      const products = await page.evaluate(() =>
-        Array.from(document.querySelectorAll('.thumbnail'), (e) => ({
+    const urls = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('.thumbnail'), (e) => {
+        return {
           name: e.querySelector<HTMLAnchorElement>('.caption a')!.title,
-          price: Number(
-            e.querySelector('.caption > h4')?.innerHTML.replace('$', ''),
-          ),
+          url: e.querySelector<HTMLAnchorElement>('.caption a')!.href,
+        };
+      }).filter(val => val),
+    );
+    
+    const parsedUrls = urls.filter(val => val.name?.includes(
+      searchParam.charAt(0).toUpperCase() + searchParam.slice(1),
+    )).map(product => product.url);
+
+    const products = await Promise.all(
+      parsedUrls.map(async url => {
+        const newPage = await browser.newPage();
+        await newPage.goto(url);
+
+        return newPage.evaluate(() => ({
+          name: document.querySelector('.caption h4:last-of-type')!.innerHTML,
+          price: Number(document.querySelector('.caption > h4')?.innerHTML.replace('$', '')),
           reviews: Number(
-            e.querySelector('.ratings p')?.innerHTML.replace(/\D/g, ''),
+            document.querySelector('.ratings p')?.innerHTML.replace(/\D/g, ''),
           ),
-          rating: e.querySelectorAll('.ratings span').length,
-          tags: e
-            .querySelector('.description')!
-            .innerHTML.split(',')
-            .map((tag) => tag.trim()),
-        })),
-      );
+          rating: document.querySelectorAll('.ratings span').length,
+          description: document.querySelector('.description')!.innerHTML,
+        }));
+      }),
+    );
 
-      await browser.close();
+    await browser.close();
 
-      return products
-        .filter((product) =>
-          product.name?.includes(
-            searchParam.charAt(0).toUpperCase() + searchParam.slice(1),
-          ),
-        )
-        .sort((a, b) =>
-          sortType.toUpperCase() === 'ASC'
-            ? a.price - b.price
-            : b.price - a.price,
-        );
-    };
-
-    return getProducts();
+    return products;
   }
 }
 

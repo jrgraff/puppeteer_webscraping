@@ -41,28 +41,17 @@ $ yarn dev
 
 ## Utilização <a name = "usage"></a>
 
-A API possui apenas uma rota do tipo GET que aceita dois parâmetros opcionais.
+A API possui apenas uma rota do tipo GET que aceita um parâmetros de filtro opcional.
 
 ```
 URL: http://localhost:5000/
 ```
 
+Exemplo de url com parâmetro
+
+```
+http://localhost:5000/?search=lenovo
+```
+
 Parâmetro search serve para filtrar o nome do produto desejado.
 Valor padrão 'Lenovo'
-
-```
-search=lenovo
-```
-
-Parâmetro sort serve para ordenar os produtos por preço.
-Valor padrão 'ASC' (qualquer valor diferente de 'asc' será válido como 'desc')
-
-```
-sort=ASC
-```
-
-Exemplo de url
-
-```
-http://localhost:5000/?search=lenovo&sort=asc
-```
